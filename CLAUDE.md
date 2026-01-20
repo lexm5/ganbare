@@ -1,0 +1,108 @@
+# プロジェクト概要
+
+**やる気支援アプリ** - Next.js + TypeScript + Material UI (MUI)
+
+## 技術スタック
+
+- **フレームワーク**: Next.js (App Router)
+- **言語**: TypeScript
+- **UIライブラリ**: Material UI (MUI)
+- **スタイリング**: Tailwind CSS + MUI sx props
+- **アイコン**: @mui/icons-material
+
+## フォルダ構成
+
+```
+frontend/
+├── src/
+│   ├── app/                          # ページ (App Router)
+│   │   ├── layout.tsx
+│   │   ├── page.tsx                  # トップ (/)
+│   │   ├── dashboard/page.tsx        # ダッシュボード
+│   │   ├── tasks/page.tsx            # タスク管理
+│   │   ├── habits/page.tsx           # 習慣トラッカー
+│   │   ├── stats/page.tsx            # 統計・分析
+│   │   ├── timer/page.tsx            # ポモドーロタイマー
+│   │   ├── badges/page.tsx           # バッジ・実績
+│   │   └── setting/page.tsx          # 設定
+│   │
+│   └── components/
+│       ├── common/                   # 共通コンポーネント
+│       │   ├── PageHeader.tsx        # ページヘッダー
+│       │   ├── StatCard.tsx          # 統計カード
+│       │   ├── ProgressBar.tsx       # プログレスバー
+│       │   └── QuoteCard.tsx         # 名言カード
+│       │
+│       ├── header/                   # ヘッダー関連
+│       │   ├── Header.tsx
+│       │   ├── Menu.tsx
+│       │   ├── SearchBar.tsx
+│       │   ├── ProfileMenu.tsx
+│       │   ├── MessagesMenu.tsx
+│       │   ├── NotificationsMenu.tsx
+│       │   └── MobileMenu.tsx
+│       │
+│       ├── dashboard/                # ダッシュボード用
+│       │   ├── TodayProgress.tsx
+│       │   ├── QuickActions.tsx
+│       │   └── RecentActivity.tsx
+│       │
+│       ├── tasks/                    # タスク管理用
+│       │   ├── TaskItem.tsx
+│       │   ├── TaskList.tsx
+│       │   └── TaskForm.tsx
+│       │
+│       ├── habits/                   # 習慣トラッカー用
+│       │   ├── HabitItem.tsx
+│       │   ├── HabitList.tsx
+│       │   └── StreakBadge.tsx
+│       │
+│       ├── stats/                    # 統計用
+│       │   ├── ChartCard.tsx
+│       │   └── WeeklyChart.tsx
+│       │
+│       ├── timer/                    # タイマー用
+│       │   ├── TimerDisplay.tsx
+│       │   └── TimerControls.tsx
+│       │
+│       └── badges/                   # バッジ用
+│           ├── BadgeCard.tsx
+│           └── LevelProgress.tsx
+```
+
+## ページ一覧
+
+| パス | 説明 |
+|------|------|
+| `/` | トップページ |
+| `/dashboard` | ダッシュボード（今日の進捗、統計、クイックアクション） |
+| `/tasks` | タスク管理（追加、編集、完了、フィルタ） |
+| `/habits` | 習慣トラッカー（毎日のチェック、連続記録） |
+| `/stats` | 統計・分析（グラフ、達成率） |
+| `/timer` | ポモドーロタイマー（25分集中 + 5分休憩） |
+| `/badges` | バッジ・実績（レベル、経験値、獲得バッジ） |
+| `/setting` | 設定（プロフィール、テーマ、通知、アカウント） |
+
+## コンポーネント設計方針
+
+1. **パーツ化**: 1ファイル1コンポーネント、再利用可能に
+2. **Props型定義**: interfaceで明確に定義
+3. **共通化**: `common/` に汎用コンポーネント
+4. **機能別分類**: 各機能ごとにフォルダ分け
+
+## 開発コマンド
+
+```bash
+cd frontend
+npm run dev      # 開発サーバー
+npm run build    # ビルド
+```
+
+## 主な機能
+
+- **タスク管理**: 優先度付きタスクの追加・完了・削除
+- **習慣トラッカー**: 毎日の習慣チェック、連続記録表示
+- **ポモドーロタイマー**: 25分集中 + 5分休憩のサイクル
+- **バッジ/実績**: 達成時に獲得、レベルアップシステム
+- **統計**: 週間グラフ、達成率表示
+- **名言表示**: モチベーション向上のためのランダム名言
