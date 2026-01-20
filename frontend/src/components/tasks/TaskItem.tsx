@@ -9,13 +9,15 @@ import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import StarIcon from '@mui/icons-material/Star';
+import { Difficulty, POINT_RANGES } from '@/types/point';
 
 export interface Task {
   id: string;
   title: string;
   completed: boolean;
-  priority?: 'low' | 'medium' | 'high';
-  dueDate?: string;
+  difficulty: Difficulty;
+  points: number;
 }
 
 interface TaskItemProps {
@@ -25,13 +27,15 @@ interface TaskItemProps {
   onDelete?: (id: string) => void;
 }
 
-const priorityColors = {
-  low: 'success',
+const difficultyColors = {
+  easy: 'success',
   medium: 'warning',
-  high: 'error',
+  hard: 'error',
 } as const;
 
 export default function TaskItem({ task, onToggle, onEdit, onDelete }: TaskItemProps) {
+  const difficultyLabel = POINT_RANGES[task.difficulty].label;
+
   return (
     <ListItem
       sx={{
@@ -39,7 +43,7 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete }: TaskItemP
         borderRadius: 1,
         mb: 1,
         border: '1px solid',
-        borderColor: 'divider',
+        borderColor: task.completed ? 'success.main' : 'divider',
       }}
       secondaryAction={
         <Box>
@@ -60,16 +64,25 @@ export default function TaskItem({ task, onToggle, onEdit, onDelete }: TaskItemP
       </ListItemIcon>
       <ListItemText
         primary={task.title}
-        sx={{ textDecoration: task.completed ? 'line-through' : 'none' }}
+        sx={{
+          textDecoration: task.completed ? 'line-through' : 'none',
+          opacity: task.completed ? 0.6 : 1,
+        }}
       />
-      {task.priority && (
-        <Chip
-          label={task.priority}
-          size="small"
-          color={priorityColors[task.priority]}
-          sx={{ mr: 1 }}
-        />
-      )}
+      <Chip
+        label={difficultyLabel}
+        size="small"
+        color={difficultyColors[task.difficulty]}
+        sx={{ mr: 1 }}
+      />
+      <Chip
+        icon={<StarIcon />}
+        label={`${task.points} pt`}
+        size="small"
+        color="warning"
+        variant="outlined"
+        sx={{ mr: 1 }}
+      />
     </ListItem>
   );
 }

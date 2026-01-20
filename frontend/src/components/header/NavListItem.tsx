@@ -12,6 +12,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import TimerIcon from '@mui/icons-material/Timer';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import SettingsIcon from '@mui/icons-material/Settings';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import { NavItem } from './navItems';
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -22,6 +23,7 @@ const iconMap: Record<string, React.ReactNode> = {
   Timer: <TimerIcon />,
   EmojiEvents: <EmojiEventsIcon />,
   Settings: <SettingsIcon />,
+  CardGiftcard: <CardGiftcardIcon />,
 };
 
 interface NavListItemProps {
