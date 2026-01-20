@@ -8,7 +8,6 @@ import CardContent from '@mui/material/CardContent';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
-import AddIcon from '@mui/icons-material/Add';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import PageHeader from '@/components/common/PageHeader';
 import PointSummary from '@/components/points/PointSummary';
@@ -16,6 +15,7 @@ import TaskCardList from '@/components/tasks/TaskCardList';
 import TaskFilters from '@/components/tasks/TaskFilters';
 import TaskFormDialog from '@/components/tasks/TaskFormDialog';
 import TaskEditDialog from '@/components/tasks/TaskEditDialog';
+import TaskSearchBar from '@/components/tasks/TaskSearchBar';
 import CategoryManager from '@/components/tasks/CategoryManager';
 import { Task, Category, TaskFilters as Filters, DEFAULT_CATEGORIES } from '@/types/task';
 import { Difficulty, PointStatus } from '@/types/point';
@@ -33,6 +33,7 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [filters, setFilters] = useState<Filters>({ status: 'all', categoryId: null, difficulty: null });
+  const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editTaskId, setEditTaskId] = useState<string | null>(null);
@@ -104,6 +105,13 @@ export default function TasksPage() {
 
   // フィルタリング
   const filteredTasks = tasks.filter(t => {
+    // 検索クエリでフィルタ
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchTitle = t.title.toLowerCase().includes(query);
+      const matchDesc = t.description?.toLowerCase().includes(query);
+      if (!matchTitle && !matchDesc) return false;
+    }
     if (filters.status === 'pending' && t.completed) return false;
     if (filters.status === 'completed' && !t.completed) return false;
     if (filters.categoryId && t.categoryId !== filters.categoryId) return false;
@@ -124,11 +132,14 @@ export default function TasksPage() {
       <PageHeader
         title="タスク管理"
         description="タスクを完了してポイントを貯めよう"
-        action={
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormOpen(true)}>
-            タスクを追加
-          </Button>
-        }
+      />
+
+      {/* 検索バー */}
+      <TaskSearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        onCreateClick={() => setFormOpen(true)}
+        resultCount={filteredTasks.length}
       />
 
       <Grid container spacing={3}>
@@ -161,17 +172,26 @@ export default function TasksPage() {
           <Card variant="outlined">
             <CardContent>
               {/* フィルタートグル */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <Button
+                  size="small"
                   startIcon={<FilterListIcon />}
                   onClick={() => setShowFilters(!showFilters)}
                   color={showFilters ? 'primary' : 'inherit'}
+                  sx={{ borderRadius: 2 }}
                 >
                   フィルター
                 </Button>
-                <Box sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
-                  {filteredTasks.length} 件のタスク
-                </Box>
+                {(filters.status !== 'all' || filters.categoryId || filters.difficulty) && (
+                  <Button
+                    size="small"
+                    onClick={() => setFilters({ status: 'all', categoryId: null, difficulty: null })}
+                    color="inherit"
+                    sx={{ fontSize: '0.75rem' }}
+                  >
+                    クリア
+                  </Button>
+                )}
               </Box>
 
               {/* フィルター */}
