@@ -9,8 +9,11 @@ import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import StarIcon from '@mui/icons-material/Star';
 import PageHeader from '@/components/common/PageHeader';
 import PointSummary from '@/components/points/PointSummary';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import RewardList from '@/components/rewards/RewardList';
 import RewardForm from '@/components/rewards/RewardForm';
 import { Reward, PointStatus } from '@/types/point';
@@ -27,6 +30,7 @@ const initialRewards: Reward[] = [
 export default function RewardsPage() {
   const [rewards, setRewards] = useState<Reward[]>(initialRewards);
   const [tab, setTab] = useState(0);
+  const [redeemTarget, setRedeemTarget] = useState<Reward | null>(null);
   const [pointStatus, setPointStatus] = useState<PointStatus>({
     totalEarned: 150,
     totalSpent: 50,
@@ -36,17 +40,23 @@ export default function RewardsPage() {
   const handleRedeem = (id: string) => {
     const reward = rewards.find(r => r.id === id);
     if (!reward || reward.redeemed || pointStatus.currentPoints < reward.cost) return;
+    setRedeemTarget(reward);
+  };
+
+  const handleConfirmRedeem = () => {
+    if (!redeemTarget) return;
 
     setRewards(rewards.map(r =>
-      r.id === id
+      r.id === redeemTarget.id
         ? { ...r, redeemed: true, redeemedAt: new Date().toLocaleDateString('ja-JP') }
         : r
     ));
     setPointStatus(prev => ({
       ...prev,
-      totalSpent: prev.totalSpent + reward.cost,
-      currentPoints: prev.currentPoints - reward.cost,
+      totalSpent: prev.totalSpent + redeemTarget.cost,
+      currentPoints: prev.currentPoints - redeemTarget.cost,
     }));
+    setRedeemTarget(null);
   };
 
   const handleAddReward = (reward: { name: string; description: string; cost: number }) => {
@@ -106,6 +116,37 @@ export default function RewardsPage() {
           </Card>
         </Grid>
       </Grid>
+
+      {/* 交換確認ダイアログ */}
+      <ConfirmDialog
+        open={!!redeemTarget}
+        title="ご褒美を交換しますか？"
+        message="ポイントを使用してこのご褒美と交換します。この操作は取り消せません。"
+        details={
+          redeemTarget && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant="body2" color="text.secondary">ご褒美</Typography>
+                <Typography variant="body2" fontWeight="bold">{redeemTarget.name}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2" color="text.secondary">必要ポイント</Typography>
+                <Chip icon={<StarIcon />} label={`${redeemTarget.cost} pt`} size="small" color="warning" />
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2" color="text.secondary">交換後の残高</Typography>
+                <Typography variant="body2" fontWeight="bold" color="primary">
+                  {pointStatus.currentPoints - redeemTarget.cost} pt
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+        confirmText="交換する"
+        confirmColor="warning"
+        onConfirm={handleConfirmRedeem}
+        onCancel={() => setRedeemTarget(null)}
+      />
     </Container>
   );
 }
