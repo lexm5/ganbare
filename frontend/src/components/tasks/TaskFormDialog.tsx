@@ -27,6 +27,7 @@ interface TaskFormDialogProps {
     difficulty: Difficulty;
     points: number;
     categoryId: string;
+    dueDate?: string;
   }) => void;
   categories: Category[];
 }
@@ -37,6 +38,7 @@ export default function TaskFormDialog({ open, onClose, onSubmit, categories }: 
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [points, setPoints] = useState(POINT_RANGES.medium.min);
   const [categoryId, setCategoryId] = useState(categories[0]?.id || '');
+  const [dueDate, setDueDate] = useState('');
 
   const range = POINT_RANGES[difficulty];
 
@@ -51,6 +53,7 @@ export default function TaskFormDialog({ open, onClose, onSubmit, categories }: 
       setDifficulty('medium');
       setPoints(POINT_RANGES.medium.min);
       setCategoryId(categories[0]?.id || '');
+      setDueDate('');
     }
   }, [open, categories]);
 
@@ -62,6 +65,7 @@ export default function TaskFormDialog({ open, onClose, onSubmit, categories }: 
         difficulty,
         points,
         categoryId,
+        dueDate: dueDate || undefined,
       });
       onClose();
     }
@@ -118,6 +122,14 @@ export default function TaskFormDialog({ open, onClose, onSubmit, categories }: 
               </Select>
             </FormControl>
           </Box>
+          <TextField
+            label="期限日（任意）"
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            fullWidth
+          />
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
               <Typography variant="body2" color="text.secondary">

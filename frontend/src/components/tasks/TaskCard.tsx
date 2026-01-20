@@ -8,7 +8,6 @@ import IconButton from '@mui/material/IconButton';
 import Chip from '@mui/material/Chip';
 import Checkbox from '@mui/material/Checkbox';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import StarIcon from '@mui/icons-material/Star';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { Task, Category } from '@/types/task';
@@ -32,6 +31,20 @@ const difficultyColors = {
 export default function TaskCard({ task, category, onToggle, onEdit, onDelete }: TaskCardProps) {
   const difficultyLabel = POINT_RANGES[task.difficulty].label;
 
+  const handleCardClick = () => {
+    onEdit?.(task.id);
+  };
+
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggle?.(task.id);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete?.(task.id);
+  };
+
   return (
     <Card
       variant="outlined"
@@ -41,17 +54,20 @@ export default function TaskCard({ task, category, onToggle, onEdit, onDelete }:
         borderLeft: '4px solid',
         borderLeftColor: category.color,
         transition: 'all 0.2s',
+        cursor: 'pointer',
         '&:hover': {
           boxShadow: 2,
+          bgcolor: 'action.hover',
         },
       }}
+      onClick={handleCardClick}
     >
       <CardContent sx={{ pb: '12px !important' }}>
         {/* ヘッダー */}
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
           <Checkbox
             checked={task.completed}
-            onChange={() => onToggle?.(task.id)}
+            onClick={handleCheckboxClick}
             sx={{ p: 0, mr: 1 }}
           />
           <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -71,14 +87,9 @@ export default function TaskCard({ task, category, onToggle, onEdit, onDelete }:
               </Typography>
             )}
           </Box>
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <IconButton size="small" onClick={() => onEdit?.(task.id)}>
-              <EditIcon fontSize="small" />
-            </IconButton>
-            <IconButton size="small" onClick={() => onDelete?.(task.id)}>
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Box>
+          <IconButton size="small" onClick={handleDeleteClick}>
+            <DeleteIcon fontSize="small" />
+          </IconButton>
         </Box>
 
         {/* タグエリア */}

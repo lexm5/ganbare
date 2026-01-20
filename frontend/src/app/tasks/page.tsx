@@ -15,6 +15,7 @@ import PointSummary from '@/components/points/PointSummary';
 import TaskCardList from '@/components/tasks/TaskCardList';
 import TaskFilters from '@/components/tasks/TaskFilters';
 import TaskFormDialog from '@/components/tasks/TaskFormDialog';
+import TaskEditDialog from '@/components/tasks/TaskEditDialog';
 import CategoryManager from '@/components/tasks/CategoryManager';
 import { Task, Category, TaskFilters as Filters, DEFAULT_CATEGORIES } from '@/types/task';
 import { Difficulty, PointStatus } from '@/types/point';
@@ -34,6 +35,7 @@ export default function TasksPage() {
   const [filters, setFilters] = useState<Filters>({ status: 'all', categoryId: null, difficulty: null });
   const [showFilters, setShowFilters] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
+  const [editTaskId, setEditTaskId] = useState<string | null>(null);
   const [pointStatus, setPointStatus] = useState<PointStatus>({
     totalEarned: 3,
     totalSpent: 0,
@@ -65,6 +67,18 @@ export default function TasksPage() {
 
   const handleDelete = (id: string) => {
     setTasks(tasks.filter(t => t.id !== id));
+  };
+
+  const handleEdit = (id: string) => {
+    setEditTaskId(id);
+  };
+
+  const handleSaveEdit = (id: string, updates: { title: string; description?: string; categoryId: string }) => {
+    setTasks(tasks.map(t =>
+      t.id === id
+        ? { ...t, title: updates.title, description: updates.description, categoryId: updates.categoryId }
+        : t
+    ));
   };
 
   const handleAdd = (task: { title: string; description: string; difficulty: Difficulty; points: number; categoryId: string }) => {
@@ -175,6 +189,7 @@ export default function TasksPage() {
                 tasks={filteredTasks}
                 categories={categories}
                 onToggle={handleToggle}
+                onEdit={handleEdit}
                 onDelete={handleDelete}
               />
             </CardContent>
@@ -188,6 +203,15 @@ export default function TasksPage() {
         onClose={() => setFormOpen(false)}
         onSubmit={handleAdd}
         categories={categories}
+      />
+
+      {/* タスク編集ダイアログ */}
+      <TaskEditDialog
+        open={!!editTaskId}
+        task={tasks.find(t => t.id === editTaskId) || null}
+        categories={categories}
+        onClose={() => setEditTaskId(null)}
+        onSave={handleSaveEdit}
       />
     </Container>
   );
