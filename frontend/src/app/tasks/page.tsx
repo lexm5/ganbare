@@ -5,26 +5,35 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Collapse from '@mui/material/Collapse';
+import AddIcon from '@mui/icons-material/Add';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import PageHeader from '@/components/common/PageHeader';
-import TaskForm from '@/components/tasks/TaskForm';
-import TaskList from '@/components/tasks/TaskList';
 import PointSummary from '@/components/points/PointSummary';
-import { Task } from '@/components/tasks/TaskItem';
+import TaskCardList from '@/components/tasks/TaskCardList';
+import TaskFilters from '@/components/tasks/TaskFilters';
+import TaskFormDialog from '@/components/tasks/TaskFormDialog';
+import CategoryManager from '@/components/tasks/CategoryManager';
+import { Task, Category, TaskFilters as Filters, DEFAULT_CATEGORIES } from '@/types/task';
 import { Difficulty, PointStatus } from '@/types/point';
 
 // サンプルデータ
 const initialTasks: Task[] = [
-  { id: '1', title: '企画書を作成する', completed: false, difficulty: 'hard', points: 20 },
-  { id: '2', title: 'メールを返信する', completed: true, difficulty: 'easy', points: 3 },
-  { id: '3', title: '資料を読む', completed: false, difficulty: 'medium', points: 10 },
+  { id: '1', title: '企画書を作成する', description: '来週の会議用', completed: false, difficulty: 'hard', points: 20, categoryId: 'work', createdAt: '2024-01-20' },
+  { id: '2', title: 'メールを返信する', completed: true, difficulty: 'easy', points: 3, categoryId: 'work', createdAt: '2024-01-20' },
+  { id: '3', title: '英語の単語を覚える', description: '50単語', completed: false, difficulty: 'medium', points: 10, categoryId: 'study', createdAt: '2024-01-20' },
+  { id: '4', title: '部屋の掃除', completed: false, difficulty: 'medium', points: 8, categoryId: 'housework', createdAt: '2024-01-20' },
+  { id: '5', title: '本を読む', description: '30分以上', completed: false, difficulty: 'easy', points: 5, categoryId: 'hobby', createdAt: '2024-01-20' },
 ];
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [tab, setTab] = useState(0);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+  const [filters, setFilters] = useState<Filters>({ status: 'all', categoryId: null, difficulty: null });
+  const [showFilters, setShowFilters] = useState(true);
+  const [formOpen, setFormOpen] = useState(false);
   const [pointStatus, setPointStatus] = useState<PointStatus>({
     totalEarned: 3,
     totalSpent: 0,
@@ -35,7 +44,6 @@ export default function TasksPage() {
     setTasks(tasks.map(t => {
       if (t.id === id) {
         const newCompleted = !t.completed;
-        // ポイント計算
         if (newCompleted) {
           setPointStatus(prev => ({
             ...prev,
@@ -59,63 +67,113 @@ export default function TasksPage() {
     setTasks(tasks.filter(t => t.id !== id));
   };
 
-  const handleAdd = (task: { title: string; difficulty: Difficulty; points: number }) => {
+  const handleAdd = (task: { title: string; description: string; difficulty: Difficulty; points: number; categoryId: string }) => {
     setTasks([...tasks, {
       id: Date.now().toString(),
       title: task.title,
+      description: task.description || undefined,
       completed: false,
       difficulty: task.difficulty,
       points: task.points,
+      categoryId: task.categoryId,
+      createdAt: new Date().toISOString().split('T')[0],
     }]);
   };
 
-  const filteredTasks = tab === 0
-    ? tasks
-    : tab === 1
-      ? tasks.filter(t => !t.completed)
-      : tasks.filter(t => t.completed);
+  const handleAddCategory = (cat: Omit<Category, 'id'>) => {
+    setCategories([...categories, { id: Date.now().toString(), ...cat }]);
+  };
+
+  const handleDeleteCategory = (id: string) => {
+    setCategories(categories.filter(c => c.id !== id));
+  };
+
+  // フィルタリング
+  const filteredTasks = tasks.filter(t => {
+    if (filters.status === 'pending' && t.completed) return false;
+    if (filters.status === 'completed' && !t.completed) return false;
+    if (filters.categoryId && t.categoryId !== filters.categoryId) return false;
+    if (filters.difficulty && t.difficulty !== filters.difficulty) return false;
+    return true;
+  });
+
+  const taskCounts = {
+    all: tasks.length,
+    pending: tasks.filter(t => !t.completed).length,
+    completed: tasks.filter(t => t.completed).length,
+  };
 
   const totalPendingPoints = tasks.filter(t => !t.completed).reduce((sum, t) => sum + t.points, 0);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
       <PageHeader
         title="タスク管理"
         description="タスクを完了してポイントを貯めよう"
+        action={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormOpen(true)}>
+            タスクを追加
+          </Button>
+        }
       />
 
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <PointSummary status={pointStatus} />
-          <Card variant="outlined" sx={{ mt: 2 }}>
-            <CardContent>
-              <Box sx={{ textAlign: 'center' }}>
-                <Box sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
-                  未完了タスクの合計
+        {/* サイドバー */}
+        <Grid size={{ xs: 12, lg: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <PointSummary status={pointStatus} />
+            <Card variant="outlined">
+              <CardContent>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Box sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+                    未完了タスクの合計
+                  </Box>
+                  <Box sx={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'primary.main' }}>
+                    {totalPendingPoints} pt
+                  </Box>
                 </Box>
-                <Box sx={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'primary.main' }}>
-                  {totalPendingPoints} pt
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+            <CategoryManager
+              categories={categories}
+              onAdd={handleAddCategory}
+              onDelete={handleDeleteCategory}
+            />
+          </Box>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 8 }}>
+        {/* メインコンテンツ */}
+        <Grid size={{ xs: 12, lg: 9 }}>
           <Card variant="outlined">
             <CardContent>
-              <TaskForm onSubmit={handleAdd} />
-
-              <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-                <Tabs value={tab} onChange={(_, v) => setTab(v)}>
-                  <Tab label={`すべて (${tasks.length})`} />
-                  <Tab label={`未完了 (${tasks.filter(t => !t.completed).length})`} />
-                  <Tab label={`完了 (${tasks.filter(t => t.completed).length})`} />
-                </Tabs>
+              {/* フィルタートグル */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Button
+                  startIcon={<FilterListIcon />}
+                  onClick={() => setShowFilters(!showFilters)}
+                  color={showFilters ? 'primary' : 'inherit'}
+                >
+                  フィルター
+                </Button>
+                <Box sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+                  {filteredTasks.length} 件のタスク
+                </Box>
               </Box>
 
-              <TaskList
+              {/* フィルター */}
+              <Collapse in={showFilters}>
+                <TaskFilters
+                  filters={filters}
+                  categories={categories}
+                  onChange={setFilters}
+                  taskCounts={taskCounts}
+                />
+              </Collapse>
+
+              {/* タスク一覧 */}
+              <TaskCardList
                 tasks={filteredTasks}
+                categories={categories}
                 onToggle={handleToggle}
                 onDelete={handleDelete}
               />
@@ -123,6 +181,14 @@ export default function TasksPage() {
           </Card>
         </Grid>
       </Grid>
+
+      {/* タスク追加ダイアログ */}
+      <TaskFormDialog
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onSubmit={handleAdd}
+        categories={categories}
+      />
     </Container>
   );
 }
