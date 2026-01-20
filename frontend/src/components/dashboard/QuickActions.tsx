@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
@@ -17,13 +18,31 @@ export default function QuickActions() {
           クイックアクション
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Button variant="outlined" startIcon={<AddIcon />} fullWidth>
+          <Button
+            component={Link}
+            href="/tasks"
+            variant="outlined"
+            startIcon={<AddIcon />}
+            fullWidth
+          >
             タスクを追加
           </Button>
-          <Button variant="outlined" startIcon={<TimerIcon />} fullWidth>
+          <Button
+            component={Link}
+            href="/timer"
+            variant="outlined"
+            startIcon={<TimerIcon />}
+            fullWidth
+          >
             タイマーを開始
           </Button>
-          <Button variant="outlined" startIcon={<CheckCircleIcon />} fullWidth>
+          <Button
+            component={Link}
+            href="/habits"
+            variant="outlined"
+            startIcon={<CheckCircleIcon />}
+            fullWidth
+          >
             習慣をチェック
           </Button>
         </Box>

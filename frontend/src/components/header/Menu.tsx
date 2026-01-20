@@ -1,13 +1,15 @@
-"use client";
+'use client';
 
 import * as React from 'react';
 import IconButton from '@mui/material/IconButton';
 import Drawer from '@mui/material/Drawer';
+import Box from '@mui/material/Box';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import MenuIcon from "@mui/icons-material/Menu";
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import MenuIcon from '@mui/icons-material/Menu';
+import NavListItem from './NavListItem';
+import { navItems } from './navItems';
 
 export default function Menu() {
     const [open, setOpen] = React.useState(false);
@@ -24,7 +26,6 @@ export default function Menu() {
                 color="inherit"
                 aria-label="open drawer"
                 onClick={toggleDrawer(true)}
-                sx={{ mr: 2 }}
             >
                 <MenuIcon />
             </IconButton>
@@ -33,23 +34,23 @@ export default function Menu() {
                 open={open}
                 onClose={toggleDrawer(false)}
             >
-                <List sx={{ width: 250 }}>
-                    <ListItem disablePadding>
-                        <ListItemButton onClick={toggleDrawer(false)}>
-                            <ListItemText primary="ホーム" />
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton onClick={toggleDrawer(false)}>
-                            <ListItemText primary="設定" />
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton onClick={toggleDrawer(false)}>
-                            <ListItemText primary="ヘルプ" />
-                        </ListItemButton>
-                    </ListItem>
-                </List>
+                <Box sx={{ width: 280 }}>
+                    <Box sx={{ p: 2 }}>
+                        <Typography variant="h6" fontWeight="bold">
+                            やる気支援アプリ
+                        </Typography>
+                    </Box>
+                    <Divider />
+                    <List>
+                        {navItems.map((item) => (
+                            <NavListItem
+                                key={item.href}
+                                item={item}
+                                onClick={toggleDrawer(false)}
+                            />
+                        ))}
+                    </List>
+                </Box>
             </Drawer>
         </>
     );
