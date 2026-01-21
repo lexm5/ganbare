@@ -3,9 +3,13 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './errors';
+import { initializeServices } from './services';
 
 // 環境変数を読み込み
 dotenv.config();
+
+// サービスの初期化
+initializeServices();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
