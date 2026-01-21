@@ -32,6 +32,7 @@ export interface User {
 /**
  * ユーザー（パスワードなし）
  */
+//Omit<user,keys> keysの内容を除外した情報を変数に構築する
 export type UserWithoutPassword = Omit<User, 'passwordHash'>;
 
 /**
