@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import PageHeader from '@/components/common/PageHeader';
 import StatCard from '@/components/common/StatCard';
 import QuoteCard from '@/components/common/QuoteCard';
+import LoginBonusDialog from '@/components/common/LoginBonusDialog';
 import TodayProgress from '@/components/dashboard/TodayProgress';
 import QuickActions from '@/components/dashboard/QuickActions';
 import RecentActivity from '@/components/dashboard/RecentActivity';
@@ -12,6 +14,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import TimerIcon from '@mui/icons-material/Timer';
+import { useLoginBonus } from '@/lib/useLoginBonus';
 
 // サンプルデータ
 const activities = [
@@ -21,8 +24,24 @@ const activities = [
 ];
 
 export default function DashboardPage() {
+  const { showBonus, bonusPoints, streakDays, isWeeklyBonus, claimBonus } = useLoginBonus();
+  const [totalPoints, setTotalPoints] = useState(10);
+
+  const handleClaimBonus = () => {
+    setTotalPoints(prev => prev + bonusPoints);
+    claimBonus();
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* ログインボーナスダイアログ */}
+      <LoginBonusDialog
+        open={showBonus}
+        bonusPoints={bonusPoints}
+        streakDays={streakDays}
+        isWeeklyBonus={isWeeklyBonus}
+        onClaim={handleClaimBonus}
+      />
       <PageHeader
         title="ダッシュボード"
         description="今日も頑張りましょう！"

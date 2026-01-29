@@ -26,12 +26,23 @@ export interface Category {
   isDefault?: boolean;
 }
 
+// タスクステータス
+export type TaskStatus = 'todo' | 'inProgress' | 'done';
+
+// カンバンカラム設定
+export const KANBAN_COLUMNS: { status: TaskStatus; title: string; color: string }[] = [
+  { status: 'todo', title: 'To Do', color: '#9e9e9e' },
+  { status: 'inProgress', title: '進行中', color: '#2196f3' },
+  { status: 'done', title: '完了', color: '#4caf50' },
+];
+
 // タスク
 export interface Task {
   id: string;
   title: string;
   description?: string;
   completed: boolean;
+  status: TaskStatus;
   difficulty: Difficulty;
   points: number;
   categoryId: string;
