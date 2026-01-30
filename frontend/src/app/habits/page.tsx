@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocalStorage } from '@/lib/useLocalStorage';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
@@ -16,6 +16,7 @@ import TextField from '@mui/material/TextField';
 import PageHeader from '@/components/common/PageHeader';
 import HabitList from '@/components/habits/HabitList';
 import StreakBadge from '@/components/habits/StreakBadge';
+import HabitCalendar from '@/components/habits/HabitCalendar';
 import { Habit } from '@/components/habits/HabitItem';
 import AddIcon from '@mui/icons-material/Add';
 import { useNotifications } from '@/context/NotificationContext';
@@ -36,23 +37,18 @@ function processHabitsForNewDay(habits: Habit[]): Habit[] {
   const yesterday = getYesterday();
 
   return habits.map(habit => {
-    // すでに今日処理済み（lastCompletedDate が今日）ならそのまま
     if (habit.lastCompletedDate === today) {
       return habit;
     }
 
-    // 昨日完了していた → ストリークは維持、completedToday をリセット
     if (habit.lastCompletedDate === yesterday) {
       return { ...habit, completedToday: false };
     }
 
-    // 昨日も完了していなかった → ストリークリセット
     if (habit.completedToday && habit.lastCompletedDate !== today) {
-      // completedToday が true だが日付が今日でない → 古いデータ
       return { ...habit, completedToday: false, streak: 0 };
     }
 
-    // 2日以上前が最後 → ストリークリセット
     if (habit.lastCompletedDate && habit.lastCompletedDate < yesterday) {
       return { ...habit, completedToday: false, streak: 0 };
     }
@@ -63,10 +59,10 @@ function processHabitsForNewDay(habits: Habit[]): Habit[] {
 
 // サンプルデータ
 const initialHabits: Habit[] = [
-  { id: '1', name: '朝のストレッチ', streak: 7, completedToday: false },
-  { id: '2', name: '読書30分', streak: 3, completedToday: false },
-  { id: '3', name: '水を2L飲む', streak: 14, completedToday: false },
-  { id: '4', name: '早寝早起き', streak: 0, completedToday: false },
+  { id: '1', name: '朝のストレッチ', streak: 7, completedToday: false, completionHistory: [] },
+  { id: '2', name: '読書30分', streak: 3, completedToday: false, completionHistory: [] },
+  { id: '3', name: '水を2L飲む', streak: 14, completedToday: false, completionHistory: [] },
+  { id: '4', name: '早寝早起き', streak: 0, completedToday: false, completionHistory: [] },
 ];
 
 export default function HabitsPage() {
@@ -93,16 +89,19 @@ export default function HabitsPage() {
     setHabits(habits.map(h => {
       if (h.id !== id) return h;
 
+      const history = h.completionHistory || [];
+
       if (h.completedToday) {
-        // チェック解除 → ストリークを戻す
+        // チェック解除 → ストリークを戻す、履歴から今日を削除
         return {
           ...h,
           completedToday: false,
           streak: Math.max(0, h.streak - 1),
           lastCompletedDate: undefined,
+          completionHistory: history.filter(d => d !== today),
         };
       } else {
-        // チェック → ストリーク+1
+        // チェック → ストリーク+1、履歴に今日を追加
         const newStreak = h.streak + 1;
         addNotification({
           type: 'streak_achieved',
@@ -114,6 +113,7 @@ export default function HabitsPage() {
           completedToday: true,
           streak: newStreak,
           lastCompletedDate: today,
+          completionHistory: history.includes(today) ? history : [...history, today],
         };
       }
     }));
@@ -126,6 +126,7 @@ export default function HabitsPage() {
       name: newHabitName.trim(),
       streak: 0,
       completedToday: false,
+      completionHistory: [],
     };
     setHabits([...habits, newHabit]);
     setNewHabitName('');
@@ -139,6 +140,11 @@ export default function HabitsPage() {
 
   const completedCount = habits.filter(h => h.completedToday).length;
   const maxStreak = habits.length > 0 ? Math.max(...habits.map(h => h.streak)) : 0;
+
+  // 全習慣の完了日を統合
+  const allCompletionDates = useMemo(() => {
+    return habits.flatMap(h => h.completionHistory || []);
+  }, [habits]);
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -172,6 +178,18 @@ export default function HabitsPage() {
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <StreakBadge streak={maxStreak} label="最長連続記録" />
+        </Grid>
+
+        {/* カレンダー */}
+        <Grid size={{ xs: 12 }}>
+          <Card variant="outlined">
+            <CardContent>
+              <HabitCalendar
+                completionDates={allCompletionDates}
+                totalHabits={habits.length}
+              />
+            </CardContent>
+          </Card>
         </Grid>
 
         {/* 習慣リスト */}

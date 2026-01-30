@@ -15,6 +15,7 @@ export interface Habit {
   streak: number;
   completedToday: boolean;
   lastCompletedDate?: string;
+  completionHistory?: string[]; // 完了した日付の配列 (YYYY-MM-DD)
   icon?: string;
 }
 
