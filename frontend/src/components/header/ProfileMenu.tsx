@@ -1,12 +1,18 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import SettingsIcon from '@mui/icons-material/Settings';
+import PersonIcon from '@mui/icons-material/Person';
 
 export default function ProfileMenu() {
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
 
@@ -18,6 +24,11 @@ export default function ProfileMenu() {
     setAnchorEl(null);
   };
 
+  const handleNavigate = (path: string) => {
+    handleMenuClose();
+    router.push(path);
+  };
+
   const menuId = 'primary-search-account-menu';
 
   return (
@@ -25,7 +36,7 @@ export default function ProfileMenu() {
       <IconButton
         size="large"
         edge="end"
-        aria-label="account of current user"
+        aria-label="アカウントメニュー"
         aria-controls={menuId}
         aria-haspopup="true"
         onClick={handleProfileMenuOpen}
@@ -35,21 +46,21 @@ export default function ProfileMenu() {
       </IconButton>
       <Menu
         anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         id={menuId}
         keepMounted
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         open={isMenuOpen}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-        <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+        <MenuItem onClick={() => handleNavigate('/setting')}>
+          <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>プロフィール</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleNavigate('/setting')}>
+          <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>設定</ListItemText>
+        </MenuItem>
       </Menu>
     </>
   );
