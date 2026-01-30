@@ -77,36 +77,36 @@ export default function HabitCalendar({ completionDates, totalHabits }: HabitCal
 
   return (
     <Box>
-      {/* ヘッダー */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <CalendarMonthIcon color="primary" />
-        <Typography variant="h6" fontWeight="bold">
-          達成カレンダー
-        </Typography>
-      </Box>
-
-      {/* 月ナビゲーション */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, gap: 1 }}>
-        <IconButton onClick={handlePrev} size="small">
-          <ChevronLeftIcon />
-        </IconButton>
-        <Typography variant="subtitle1" fontWeight="bold" sx={{ minWidth: 120, textAlign: 'center' }}>
-          {viewYear}年 {viewMonth + 1}月
-        </Typography>
-        <IconButton onClick={handleNext} size="small" disabled={isCurrentMonth}>
-          <ChevronRightIcon />
-        </IconButton>
+      {/* ヘッダー + 月ナビゲーション */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CalendarMonthIcon color="primary" fontSize="small" />
+          <Typography variant="subtitle1" fontWeight="bold">
+            達成カレンダー
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <IconButton onClick={handlePrev} size="small">
+            <ChevronLeftIcon fontSize="small" />
+          </IconButton>
+          <Typography variant="body2" fontWeight="bold" sx={{ minWidth: 90, textAlign: 'center' }}>
+            {viewYear}年{viewMonth + 1}月
+          </Typography>
+          <IconButton onClick={handleNext} size="small" disabled={isCurrentMonth}>
+            <ChevronRightIcon fontSize="small" />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* 曜日ヘッダー */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5, mb: 0.5 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '3px', mb: '3px' }}>
         {DAY_LABELS.map((label, i) => (
           <Typography
             key={label}
             variant="caption"
             fontWeight="bold"
             color={i === 0 ? 'error.main' : i === 6 ? 'primary.main' : 'text.secondary'}
-            sx={{ textAlign: 'center', py: 0.5 }}
+            sx={{ textAlign: 'center', py: 0.25, fontSize: '0.7rem' }}
           >
             {label}
           </Typography>
@@ -114,10 +114,10 @@ export default function HabitCalendar({ completionDates, totalHabits }: HabitCal
       </Box>
 
       {/* カレンダーグリッド */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '3px' }}>
         {/* 空セル（月初の曜日オフセット） */}
         {Array.from({ length: firstDay }).map((_, i) => (
-          <Box key={`empty-${i}`} sx={{ aspectRatio: '1', minHeight: 36 }} />
+          <Box key={`empty-${i}`} sx={{ aspectRatio: '1', minHeight: 32 }} />
         ))}
 
         {/* 日付セル */}
@@ -142,13 +142,12 @@ export default function HabitCalendar({ completionDates, totalHabits }: HabitCal
               <Box
                 sx={{
                   aspectRatio: '1',
-                  minHeight: 36,
+                  minHeight: 32,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderRadius: 1,
-                  position: 'relative',
                   cursor: isFuture ? 'default' : 'pointer',
                   opacity: isFuture ? 0.3 : 1,
                   bgcolor: isToday
@@ -170,28 +169,27 @@ export default function HabitCalendar({ completionDates, totalHabits }: HabitCal
                 }}
               >
                 <Typography
-                  variant="body2"
                   fontWeight={isToday ? 'bold' : 'normal'}
                   color={
                     dow === 0 ? 'error.main' : dow === 6 ? 'primary.main' : 'text.primary'
                   }
-                  sx={{ fontSize: '0.85rem', lineHeight: 1 }}
+                  sx={{ fontSize: '0.75rem', lineHeight: 1 }}
                 >
                   {day}
                 </Typography>
 
                 {/* 達成マーク */}
                 {isPerfect && (
-                  <CheckCircleIcon sx={{ fontSize: 14, color: 'success.main', mt: 0.25 }} />
+                  <CheckCircleIcon sx={{ fontSize: 12, color: 'success.main', mt: '2px' }} />
                 )}
                 {isPartial && (
-                  <Box sx={{ display: 'flex', gap: '2px', mt: 0.25 }}>
-                    {Array.from({ length: Math.min(count, 4) }).map((_, j) => (
+                  <Box sx={{ display: 'flex', gap: '1px', mt: '2px' }}>
+                    {Array.from({ length: Math.min(count, 3) }).map((_, j) => (
                       <Box
                         key={j}
                         sx={{
-                          width: 5,
-                          height: 5,
+                          width: 4,
+                          height: 4,
                           borderRadius: '50%',
                           bgcolor: 'success.main',
                         }}
@@ -205,39 +203,42 @@ export default function HabitCalendar({ completionDates, totalHabits }: HabitCal
         })}
       </Box>
 
-      {/* 統計 */}
-      <Box sx={{ display: 'flex', gap: 1, mt: 2, flexWrap: 'wrap' }}>
-        <Chip
-          label={`達成率 ${rate}%`}
-          size="small"
-          color={rate >= 80 ? 'success' : rate >= 50 ? 'warning' : 'default'}
-          variant="outlined"
-        />
-        <Chip
-          label={`${activeDays}日 / ${pastDays}日`}
-          size="small"
-          variant="outlined"
-        />
-        {totalHabits > 0 && (
+      {/* 統計 + 凡例 */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1.5, flexWrap: 'wrap', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
           <Chip
-            icon={<WhatshotIcon />}
-            label={`全達成 ${perfectDays}日`}
+            label={`達成率 ${rate}%`}
             size="small"
-            color="error"
+            color={rate >= 80 ? 'success' : rate >= 50 ? 'warning' : 'default'}
             variant="outlined"
+            sx={{ height: 24 }}
           />
-        )}
-      </Box>
-
-      {/* 凡例 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1.5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <CheckCircleIcon sx={{ fontSize: 14, color: 'success.main' }} />
-          <Typography variant="caption" color="text.secondary">全達成</Typography>
+          <Chip
+            label={`${activeDays}/${pastDays}日`}
+            size="small"
+            variant="outlined"
+            sx={{ height: 24 }}
+          />
+          {totalHabits > 0 && (
+            <Chip
+              icon={<WhatshotIcon sx={{ fontSize: 14 }} />}
+              label={`全達成${perfectDays}日`}
+              size="small"
+              color="error"
+              variant="outlined"
+              sx={{ height: 24 }}
+            />
+          )}
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: 'success.main' }} />
-          <Typography variant="caption" color="text.secondary">一部達成</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <CheckCircleIcon sx={{ fontSize: 12, color: 'success.main' }} />
+            <Typography sx={{ fontSize: '0.65rem' }} color="text.secondary">全達成</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'success.main' }} />
+            <Typography sx={{ fontSize: '0.65rem' }} color="text.secondary">一部</Typography>
+          </Box>
         </Box>
       </Box>
     </Box>

@@ -7,7 +7,9 @@ import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -147,7 +149,7 @@ export default function HabitsPage() {
   }, [habits]);
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       <PageHeader
         title="習慣トラッカー"
         description="毎日の習慣を記録して、継続の力を実感しよう"
@@ -163,27 +165,10 @@ export default function HabitsPage() {
       />
 
       <Grid container spacing={3}>
-        {/* サマリー */}
-        <Grid size={{ xs: 12, sm: 6 }}>
+        {/* 左カラム: カレンダー + サマリー */}
+        <Grid size={{ xs: 12, md: 7 }}>
           <Card variant="outlined">
-            <CardContent>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                今日の達成
-              </Typography>
-              <Typography variant="h4" fontWeight="bold">
-                {completedCount} / {habits.length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
-          <StreakBadge streak={maxStreak} label="最長連続記録" />
-        </Grid>
-
-        {/* カレンダー */}
-        <Grid size={{ xs: 12 }}>
-          <Card variant="outlined">
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, sm: 3 }, '&:last-child': { pb: { xs: 2, sm: 3 } } }}>
               <HabitCalendar
                 completionDates={allCompletionDates}
                 totalHabits={habits.length}
@@ -192,16 +177,29 @@ export default function HabitsPage() {
           </Card>
         </Grid>
 
-        {/* 習慣リスト */}
-        <Grid size={{ xs: 12 }}>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
-                今日の習慣
-              </Typography>
-              <HabitList habits={habits} onToggle={handleToggle} />
-            </CardContent>
-          </Card>
+        {/* 右カラム: 今日の習慣 + ストリーク */}
+        <Grid size={{ xs: 12, md: 5 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* 今日の習慣 */}
+            <Card variant="outlined" sx={{ flex: 1 }}>
+              <CardContent sx={{ p: { xs: 2, sm: 3 }, '&:last-child': { pb: { xs: 2, sm: 3 } } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography variant="h6" fontWeight="bold">
+                    今日の習慣
+                  </Typography>
+                  <Chip
+                    label={`${completedCount} / ${habits.length}`}
+                    color={completedCount === habits.length && habits.length > 0 ? 'success' : 'default'}
+                    size="small"
+                  />
+                </Box>
+                <HabitList habits={habits} onToggle={handleToggle} />
+              </CardContent>
+            </Card>
+
+            {/* ストリーク */}
+            <StreakBadge streak={maxStreak} label="最長連続記録" />
+          </Box>
         </Grid>
       </Grid>
 
