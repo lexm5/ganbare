@@ -149,10 +149,7 @@ export default function DashboardPage() {
 
         {/* 名言 */}
         <Grid size={{ xs: 12 }}>
-          <QuoteCard
-            quote="千里の道も一歩から。小さな一歩を積み重ねよう。"
-            author="老子"
-          />
+          <QuoteCard />
         </Grid>
 
         {/* メインコンテンツ */}
