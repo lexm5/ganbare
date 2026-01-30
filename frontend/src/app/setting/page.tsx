@@ -47,9 +47,12 @@ import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import KeyIcon from '@mui/icons-material/Key';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import StorageIcon from '@mui/icons-material/Storage';
+import DownloadIcon from '@mui/icons-material/Download';
+import UploadIcon from '@mui/icons-material/Upload';
 import { useThemeMode } from '@/context/ThemeContext';
 
-type SettingSection = 'profile' | 'theme' | 'notification' | 'account';
+type SettingSection = 'profile' | 'theme' | 'notification' | 'account' | 'data';
 
 export default function SettingPage() {
   const [activeSection, setActiveSection] = useState<SettingSection>('profile');
@@ -91,6 +94,7 @@ export default function SettingPage() {
     { id: 'theme' as const, label: 'テーマ', icon: <PaletteIcon />, description: '表示モードの切り替え' },
     { id: 'notification' as const, label: '通知', icon: <NotificationsIcon />, description: '通知の受信設定' },
     { id: 'account' as const, label: 'アカウント', icon: <SecurityIcon />, description: 'セキュリティと認証' },
+    { id: 'data' as const, label: 'データ管理', icon: <StorageIcon />, description: 'エクスポート・インポート' },
   ];
 
   const renderContent = () => {
@@ -485,6 +489,173 @@ export default function SettingPage() {
                 />
                 <ChevronRightIcon color="action" />
               </ListItemButton>
+            </Card>
+          </Box>
+        );
+
+      case 'data':
+        return (
+          <Box>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              データ管理
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+              アプリのデータをエクスポート・インポートできます
+            </Typography>
+
+            {/* エクスポート */}
+            <Card variant="outlined" sx={{ mb: 3, p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <Box
+                  sx={{
+                    width: 44, height: 44, borderRadius: 2,
+                    bgcolor: 'primary.50', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  <DownloadIcon color="primary" />
+                </Box>
+                <Box>
+                  <Typography variant="subtitle1" fontWeight="medium">データエクスポート</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    すべてのデータをJSONファイルとしてダウンロードします
+                  </Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button
+                  variant="contained"
+                  startIcon={<DownloadIcon />}
+                  onClick={() => {
+                    const keys = [
+                      'app_tasks', 'app_habits', 'app_rewards', 'app_point_status',
+                      'app_notifications', 'app_profile', 'app_notification_settings',
+                      'app_goals', 'app_dark_mode', 'LAST_LOGIN_KEY', 'STREAK_KEY',
+                    ];
+                    const data: Record<string, unknown> = {};
+                    keys.forEach(key => {
+                      const val = localStorage.getItem(key);
+                      if (val !== null) {
+                        try { data[key] = JSON.parse(val); } catch { data[key] = val; }
+                      }
+                    });
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `yaruki-backup-${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    setSnackbarOpen(true);
+                  }}
+                >
+                  JSONエクスポート
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<DownloadIcon />}
+                  onClick={() => {
+                    const keys = ['app_tasks', 'app_habits', 'app_rewards', 'app_goals'];
+                    let csv = '';
+
+                    // タスク
+                    const tasksRaw = localStorage.getItem('app_tasks');
+                    if (tasksRaw) {
+                      const tasks = JSON.parse(tasksRaw);
+                      csv += 'タスク\nタイトル,ステータス,難易度,ポイント,カテゴリ\n';
+                      tasks.forEach((t: { title: string; status: string; difficulty: string; points: number; categoryId: string }) => {
+                        csv += `"${t.title}",${t.status},${t.difficulty},${t.points},${t.categoryId}\n`;
+                      });
+                      csv += '\n';
+                    }
+
+                    // 習慣
+                    const habitsRaw = localStorage.getItem('app_habits');
+                    if (habitsRaw) {
+                      const habits = JSON.parse(habitsRaw);
+                      csv += '習慣\n名前,ストリーク,今日完了\n';
+                      habits.forEach((h: { name: string; streak: number; completedToday: boolean }) => {
+                        csv += `"${h.name}",${h.streak},${h.completedToday ? 'はい' : 'いいえ'}\n`;
+                      });
+                      csv += '\n';
+                    }
+
+                    // 目標
+                    const goalsRaw = localStorage.getItem('app_goals');
+                    if (goalsRaw) {
+                      const goals = JSON.parse(goalsRaw);
+                      csv += '目標\nタイトル,進捗,目標値,単位,期間\n';
+                      goals.forEach((g: { title: string; current: number; target: number; unit: string; period: string }) => {
+                        csv += `"${g.title}",${g.current},${g.target},${g.unit},${g.period === 'weekly' ? '週間' : '月間'}\n`;
+                      });
+                    }
+
+                    const bom = '\uFEFF';
+                    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `yaruki-backup-${new Date().toISOString().split('T')[0]}.csv`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    setSnackbarOpen(true);
+                  }}
+                >
+                  CSVエクスポート
+                </Button>
+              </Box>
+            </Card>
+
+            {/* インポート */}
+            <Card variant="outlined" sx={{ mb: 3, p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <Box
+                  sx={{
+                    width: 44, height: 44, borderRadius: 2,
+                    bgcolor: 'success.50', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  <UploadIcon color="success" />
+                </Box>
+                <Box>
+                  <Typography variant="subtitle1" fontWeight="medium">データインポート</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    JSONバックアップファイルからデータを復元します（既存データは上書きされます）
+                  </Typography>
+                </Box>
+              </Box>
+              <Button
+                variant="outlined"
+                color="success"
+                startIcon={<UploadIcon />}
+                component="label"
+              >
+                JSONファイルを選択
+                <input
+                  type="file"
+                  accept=".json"
+                  hidden
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      try {
+                        const data = JSON.parse(ev.target?.result as string);
+                        Object.entries(data).forEach(([key, value]) => {
+                          localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+                        });
+                        setSnackbarOpen(true);
+                        // ページをリロードして反映
+                        setTimeout(() => window.location.reload(), 1000);
+                      } catch {
+                        alert('ファイルの読み込みに失敗しました。正しいJSONファイルを選択してください。');
+                      }
+                    };
+                    reader.readAsText(file);
+                    e.target.value = '';
+                  }}
+                />
+              </Button>
             </Card>
           </Box>
         );

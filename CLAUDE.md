@@ -49,7 +49,8 @@ frontend/
 │       ├── dashboard/                # ダッシュボード用
 │       │   ├── TodayProgress.tsx
 │       │   ├── QuickActions.tsx
-│       │   └── RecentActivity.tsx
+│       │   ├── RecentActivity.tsx
+│       │   └── GoalTracker.tsx       # 目標設定・追跡
 │       │
 │       ├── tasks/                    # タスク管理用
 │       │   ├── TaskItem.tsx
@@ -59,6 +60,7 @@ frontend/
 │       ├── habits/                   # 習慣トラッカー用
 │       │   ├── HabitItem.tsx
 │       │   ├── HabitList.tsx
+│       │   ├── HabitCalendar.tsx     # GitHub風カレンダー
 │       │   └── StreakBadge.tsx
 │       │
 │       ├── stats/                    # 統計用
@@ -115,6 +117,9 @@ npm run build    # ビルド
 - **検索バー**: タスク・習慣をlocalStorageから横断検索、ポップオーバーで結果表示、クリックで該当ページへ遷移
 - **データ永続化**: タスク・習慣・ご褒美・ポイントをlocalStorageに自動保存（`useLocalStorage`フック）
 - **動的ダッシュボード**: localStorageの実データから統計を集計表示、通知履歴を最近のアクティビティとして表示
+- **習慣カレンダー**: GitHub風コントリビューショングラフで過去12週間の達成履歴を可視化
+- **目標設定**: 週間/月間目標を設定し進捗バーで追跡、ダッシュボードに表示
+- **データエクスポート/インポート**: JSON/CSV形式でバックアップ・復元（設定 > データ管理）
 
 ## localStorage キー一覧
 
@@ -127,6 +132,7 @@ npm run build    # ビルド
 | `app_notifications` | 通知一覧 |
 | `app_profile` | プロフィール（名前、メール、自己紹介） |
 | `app_notification_settings` | 通知設定（メール、プッシュ、マーケティング） |
+| `app_goals` | 目標一覧 |
 | `app_dark_mode` | ダークモード設定 |
 | `LAST_LOGIN_KEY` | 最終ログイン日 |
 | `STREAK_KEY` | ログインストリーク |
