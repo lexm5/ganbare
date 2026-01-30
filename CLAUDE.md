@@ -42,7 +42,7 @@ frontend/
 │       │   ├── Menu.tsx
 │       │   ├── SearchBar.tsx
 │       │   ├── ProfileMenu.tsx
-│       │   ├── MessagesMenu.tsx
+│       │   ├── TipsMenu.tsx            # Tips/ヒントメニュー
 │       │   ├── NotificationsMenu.tsx
 │       │   └── MobileMenu.tsx
 │       │
@@ -111,6 +111,7 @@ npm run build    # ビルド
 - **統計**: 週間グラフ、達成率表示
 - **名言表示**: モチベーション向上のためのランダム名言
 - **通知システム**: アプリ内通知 (タスク完了、ストリーク達成、バッジ獲得等)、Context + localStorage で永続化
+- **Tipsメニュー**: ヘッダーにモチベーション向上のヒント表示（ランダム3件、更新ボタン付き）
 
 ## 通知システム
 

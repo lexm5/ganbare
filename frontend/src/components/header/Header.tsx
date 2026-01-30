@@ -10,7 +10,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Menu from './Menu';
 import SearchBar from './SearchBar';
 import ProfileMenu from './ProfileMenu';
-import MessagesMenu from './MessagesMenu';
+import TipsMenu from './TipsMenu';
 import NotificationsMenu from './NotificationsMenu';
 import MobileMenu from './MobileMenu';
 
@@ -40,7 +40,7 @@ export default function Header() {
           <SearchBar />
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <MessagesMenu />
+            <TipsMenu />
             <NotificationsMenu />
             <ProfileMenu />
           </Box>

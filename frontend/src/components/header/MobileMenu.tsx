@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
-import MailIcon from '@mui/icons-material/Mail';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MoreIcon from '@mui/icons-material/MoreVert';
@@ -66,12 +66,10 @@ export default function MobileMenu() {
         onClose={handleMenuClose}
       >
         <MenuItem>
-          <IconButton size="large" aria-label="show 4 new mails" color="inherit">
-            <Badge badgeContent={4} color="error">
-              <MailIcon />
-            </Badge>
+          <IconButton size="large" aria-label="ヒント・Tips" color="inherit">
+            <LightbulbIcon />
           </IconButton>
-          <p>Messages</p>
+          <p>Tips</p>
         </MenuItem>
         <MenuItem>
           <IconButton
