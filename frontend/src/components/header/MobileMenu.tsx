@@ -9,8 +9,10 @@ import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MoreIcon from '@mui/icons-material/MoreVert';
+import { useNotifications } from '@/context/NotificationContext';
 
 export default function MobileMenu() {
+  const { unreadCount } = useNotifications();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [profileAnchorEl, setProfileAnchorEl] = React.useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
@@ -74,14 +76,14 @@ export default function MobileMenu() {
         <MenuItem>
           <IconButton
             size="large"
-            aria-label="show 17 new notifications"
+            aria-label={`${unreadCount}件の未読通知`}
             color="inherit"
           >
-            <Badge badgeContent={17} color="error">
+            <Badge badgeContent={unreadCount} color="error">
               <NotificationsIcon />
             </Badge>
           </IconButton>
-          <p>Notifications</p>
+          <p>通知</p>
         </MenuItem>
         <MenuItem onClick={handleProfileMenuOpen}>
           <IconButton

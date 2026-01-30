@@ -1,4 +1,6 @@
 import Header from '@/components/header/Header';
+import ThemeContextProvider from '@/context/ThemeContext';
+import NotificationProvider from '@/context/NotificationContext';
 
 export default function RootLayout({
   children,
@@ -8,8 +10,12 @@ export default function RootLayout({
   return(
     <html lang="jp">
       <body>
-        <Header />
-        {children}
+        <ThemeContextProvider>
+          <NotificationProvider>
+            <Header />
+            {children}
+          </NotificationProvider>
+        </ThemeContextProvider>
       </body>
     </html>
   )

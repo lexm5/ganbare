@@ -26,6 +26,10 @@ frontend/
 │   │   ├── badges/page.tsx           # バッジ・実績
 │   │   └── setting/page.tsx          # 設定
 │   │
+│   ├── context/                      # コンテキスト (状態管理)
+│   │   ├── ThemeContext.tsx           # ダーク/ライトモード管理
+│   │   └── NotificationContext.tsx   # 通知管理 (localStorage永続化)
+│   │
 │   └── components/
 │       ├── common/                   # 共通コンポーネント
 │       │   ├── PageHeader.tsx        # ページヘッダー
@@ -106,3 +110,12 @@ npm run build    # ビルド
 - **バッジ/実績**: 達成時に獲得、レベルアップシステム
 - **統計**: 週間グラフ、達成率表示
 - **名言表示**: モチベーション向上のためのランダム名言
+- **通知システム**: アプリ内通知 (タスク完了、ストリーク達成、バッジ獲得等)、Context + localStorage で永続化
+
+## 通知システム
+
+- `NotificationContext` でアプリ全体の通知状態を管理
+- `useNotifications()` フックで通知の追加・既読・削除が可能
+- 通知タイプ: `task_complete`, `streak_achieved`, `badge_earned`, `reward_redeemed`, `login_bonus`, `info`
+- localStorage に自動保存 (最大50件)
+- ヘッダーの通知アイコンから未読件数確認・一覧表示
