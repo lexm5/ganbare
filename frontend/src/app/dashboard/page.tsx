@@ -10,11 +10,13 @@ import LoginBonusDialog from '@/components/common/LoginBonusDialog';
 import TodayProgress from '@/components/dashboard/TodayProgress';
 import QuickActions from '@/components/dashboard/QuickActions';
 import RecentActivity from '@/components/dashboard/RecentActivity';
+import GoalTracker, { Goal } from '@/components/dashboard/GoalTracker';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import StarIcon from '@mui/icons-material/Star';
 import { useLoginBonus } from '@/lib/useLoginBonus';
+import { useLocalStorage } from '@/lib/useLocalStorage';
 import { useNotifications } from '@/context/NotificationContext';
 import { Task } from '@/types/task';
 
@@ -44,6 +46,7 @@ export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [habits, setHabits] = useState<HabitData[]>([]);
   const [pointStatus, setPointStatus] = useState({ totalEarned: 0, totalSpent: 0, currentPoints: 0 });
+  const [goals, setGoals] = useLocalStorage<Goal[]>('app_goals', []);
 
   // Load data from localStorage
   useEffect(() => {
@@ -70,6 +73,23 @@ export default function DashboardPage() {
       title: 'ログインボーナス獲得！',
       message: `${bonusPoints}ポイントを獲得しました${isWeeklyBonus ? '（週間ボーナス付き）' : ''}`,
     });
+  };
+
+  const handleAddGoal = (goal: Omit<Goal, 'id' | 'current' | 'createdAt'>) => {
+    setGoals([...goals, {
+      ...goal,
+      id: Date.now().toString(),
+      current: 0,
+      createdAt: new Date().toISOString().split('T')[0],
+    }]);
+  };
+
+  const handleUpdateGoal = (id: string, current: number) => {
+    setGoals(goals.map(g => g.id === id ? { ...g, current } : g));
+  };
+
+  const handleDeleteGoal = (id: string) => {
+    setGoals(goals.filter(g => g.id !== id));
   };
 
   // Computed stats
@@ -160,8 +180,18 @@ export default function DashboardPage() {
           <QuickActions />
         </Grid>
 
+        {/* 目標トラッカー */}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <GoalTracker
+            goals={goals}
+            onAdd={handleAddGoal}
+            onUpdate={handleUpdateGoal}
+            onDelete={handleDeleteGoal}
+          />
+        </Grid>
+
         {/* 最近のアクティビティ */}
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <RecentActivity activities={recentActivities} />
         </Grid>
       </Grid>
