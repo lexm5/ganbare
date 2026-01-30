@@ -125,6 +125,8 @@ npm run build    # ビルド
 | `app_rewards` | ご褒美一覧 |
 | `app_point_status` | ポイント状態（獲得/使用/現在） |
 | `app_notifications` | 通知一覧 |
+| `app_profile` | プロフィール（名前、メール、自己紹介） |
+| `app_notification_settings` | 通知設定（メール、プッシュ、マーケティング） |
 | `LAST_LOGIN_KEY` | 最終ログイン日 |
 | `STREAK_KEY` | ログインストリーク |
 

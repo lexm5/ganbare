@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useLocalStorage } from '@/lib/useLocalStorage';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -46,21 +47,22 @@ import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import KeyIcon from '@mui/icons-material/Key';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { useThemeMode } from '@/context/ThemeContext';
 
 type SettingSection = 'profile' | 'theme' | 'notification' | 'account';
 
 export default function SettingPage() {
   const [activeSection, setActiveSection] = useState<SettingSection>('profile');
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, toggleDarkMode } = useThemeMode();
   const [showPassword, setShowPassword] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [notifications, setNotifications] = useState({
+  const [notifications, setNotifications] = useLocalStorage('app_notification_settings', {
     email: true,
     push: true,
     marketing: false,
   });
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useLocalStorage('app_profile', {
     name: 'ユーザー名',
     email: 'user@example.com',
     bio: '',
@@ -208,7 +210,7 @@ export default function SettingPage() {
 
             <Card variant="outlined" sx={{ mb: 3 }}>
               <ListItemButton
-                onClick={() => setDarkMode(!darkMode)}
+                onClick={toggleDarkMode}
                 sx={{ py: 3, px: 3 }}
               >
                 <ListItemIcon>
