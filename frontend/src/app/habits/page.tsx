@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocalStorage } from '@/lib/useLocalStorage';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
@@ -18,24 +18,105 @@ import HabitList from '@/components/habits/HabitList';
 import StreakBadge from '@/components/habits/StreakBadge';
 import { Habit } from '@/components/habits/HabitItem';
 import AddIcon from '@mui/icons-material/Add';
+import { useNotifications } from '@/context/NotificationContext';
+
+function getToday(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getYesterday(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
+}
+
+// 日付が変わった時にストリークと completedToday をリセット/更新
+function processHabitsForNewDay(habits: Habit[]): Habit[] {
+  const today = getToday();
+  const yesterday = getYesterday();
+
+  return habits.map(habit => {
+    // すでに今日処理済み（lastCompletedDate が今日）ならそのまま
+    if (habit.lastCompletedDate === today) {
+      return habit;
+    }
+
+    // 昨日完了していた → ストリークは維持、completedToday をリセット
+    if (habit.lastCompletedDate === yesterday) {
+      return { ...habit, completedToday: false };
+    }
+
+    // 昨日も完了していなかった → ストリークリセット
+    if (habit.completedToday && habit.lastCompletedDate !== today) {
+      // completedToday が true だが日付が今日でない → 古いデータ
+      return { ...habit, completedToday: false, streak: 0 };
+    }
+
+    // 2日以上前が最後 → ストリークリセット
+    if (habit.lastCompletedDate && habit.lastCompletedDate < yesterday) {
+      return { ...habit, completedToday: false, streak: 0 };
+    }
+
+    return { ...habit, completedToday: false };
+  });
+}
 
 // サンプルデータ
 const initialHabits: Habit[] = [
-  { id: '1', name: '朝のストレッチ', streak: 7, completedToday: true },
+  { id: '1', name: '朝のストレッチ', streak: 7, completedToday: false },
   { id: '2', name: '読書30分', streak: 3, completedToday: false },
-  { id: '3', name: '水を2L飲む', streak: 14, completedToday: true },
+  { id: '3', name: '水を2L飲む', streak: 14, completedToday: false },
   { id: '4', name: '早寝早起き', streak: 0, completedToday: false },
 ];
 
 export default function HabitsPage() {
+  const { addNotification } = useNotifications();
   const [habits, setHabits] = useLocalStorage<Habit[]>('app_habits', initialHabits);
   const [openDialog, setOpenDialog] = useState(false);
   const [newHabitName, setNewHabitName] = useState('');
+  const [dayProcessed, setDayProcessed] = useState(false);
+
+  // 日付変更時にストリークを処理
+  useEffect(() => {
+    if (!dayProcessed && habits.length > 0) {
+      const processed = processHabitsForNewDay(habits);
+      const changed = JSON.stringify(processed) !== JSON.stringify(habits);
+      if (changed) {
+        setHabits(processed);
+      }
+      setDayProcessed(true);
+    }
+  }, [habits, dayProcessed, setHabits]);
 
   const handleToggle = (id: string) => {
-    setHabits(habits.map(h =>
-      h.id === id ? { ...h, completedToday: !h.completedToday } : h
-    ));
+    const today = getToday();
+    setHabits(habits.map(h => {
+      if (h.id !== id) return h;
+
+      if (h.completedToday) {
+        // チェック解除 → ストリークを戻す
+        return {
+          ...h,
+          completedToday: false,
+          streak: Math.max(0, h.streak - 1),
+          lastCompletedDate: undefined,
+        };
+      } else {
+        // チェック → ストリーク+1
+        const newStreak = h.streak + 1;
+        addNotification({
+          type: 'streak_achieved',
+          title: `「${h.name}」を達成！`,
+          message: `${newStreak}日連続達成${newStreak >= 7 ? '！すごい！' : ''}`,
+        });
+        return {
+          ...h,
+          completedToday: true,
+          streak: newStreak,
+          lastCompletedDate: today,
+        };
+      }
+    }));
   };
 
   const handleAddHabit = () => {
@@ -57,7 +138,7 @@ export default function HabitsPage() {
   };
 
   const completedCount = habits.filter(h => h.completedToday).length;
-  const maxStreak = Math.max(...habits.map(h => h.streak));
+  const maxStreak = habits.length > 0 ? Math.max(...habits.map(h => h.streak)) : 0;
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>

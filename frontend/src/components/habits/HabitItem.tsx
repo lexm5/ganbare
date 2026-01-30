@@ -14,6 +14,7 @@ export interface Habit {
   name: string;
   streak: number;
   completedToday: boolean;
+  lastCompletedDate?: string;
   icon?: string;
 }
 

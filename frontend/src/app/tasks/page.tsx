@@ -23,11 +23,13 @@ import StarIcon from '@mui/icons-material/Star';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import CloseIcon from '@mui/icons-material/Close';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import KanbanBoard from '@/components/tasks/KanbanBoard';
 import TaskFormDialog from '@/components/tasks/TaskFormDialog';
 import TaskEditDialog from '@/components/tasks/TaskEditDialog';
 import { Task, Category, TaskFilters as Filters, TaskStatus, DEFAULT_CATEGORIES } from '@/types/task';
 import { Difficulty, PointStatus, POINT_RANGES } from '@/types/point';
+import { useNotifications } from '@/context/NotificationContext';
 
 // サンプルデータ
 const initialTasks: Task[] = [
@@ -39,6 +41,7 @@ const initialTasks: Task[] = [
 ];
 
 export default function TasksPage() {
+  const { addNotification } = useNotifications();
   const [tasks, setTasks] = useLocalStorage<Task[]>('app_tasks', initialTasks);
   const [categories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [filters, setFilters] = useState<Filters>({ status: 'all', categoryId: null, difficulty: null });
@@ -68,6 +71,11 @@ export default function TasksPage() {
             totalEarned: prev.totalEarned + t.points,
             currentPoints: prev.currentPoints + t.points,
           }));
+          addNotification({
+            type: 'task_complete',
+            title: `タスク「${t.title}」を完了！`,
+            message: `${t.points}ポイントを獲得しました`,
+          });
         } else if (wasCompleted && !isNowCompleted) {
           setPointStatus(prev => ({
             ...prev,
@@ -82,8 +90,27 @@ export default function TasksPage() {
     }));
   };
 
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
   const handleDelete = (id: string) => {
-    setTasks(tasks.filter(t => t.id !== id));
+    setDeleteTargetId(id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteTargetId) return;
+    const task = tasks.find(t => t.id === deleteTargetId);
+    setTasks(tasks.filter(t => t.id !== deleteTargetId));
+    setDeleteTargetId(null);
+    if (task) {
+      // 完了済みタスクを削除した場合、ポイントを減算
+      if (task.status === 'done') {
+        setPointStatus(prev => ({
+          ...prev,
+          totalEarned: prev.totalEarned - task.points,
+          currentPoints: prev.currentPoints - task.points,
+        }));
+      }
+    }
   };
 
   const handleEdit = (id: string) => {
@@ -383,6 +410,24 @@ export default function TasksPage() {
         categories={categories}
         onClose={() => setEditTaskId(null)}
         onSave={handleSaveEdit}
+      />
+
+      {/* タスク削除確認ダイアログ */}
+      <ConfirmDialog
+        open={!!deleteTargetId}
+        title="タスクを削除しますか？"
+        message="このタスクを削除します。この操作は取り消せません。"
+        details={
+          deleteTargetId && tasks.find(t => t.id === deleteTargetId) && (
+            <Typography variant="body2" fontWeight="bold">
+              {tasks.find(t => t.id === deleteTargetId)?.title}
+            </Typography>
+          )
+        }
+        confirmText="削除する"
+        confirmColor="error"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTargetId(null)}
       />
     </Box>
   );

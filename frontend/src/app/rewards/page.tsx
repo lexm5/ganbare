@@ -18,6 +18,7 @@ import ConfirmDialog from '@/components/common/ConfirmDialog';
 import RewardList from '@/components/rewards/RewardList';
 import RewardForm from '@/components/rewards/RewardForm';
 import { Reward, PointStatus } from '@/types/point';
+import { useNotifications } from '@/context/NotificationContext';
 
 // サンプルデータ
 const initialRewards: Reward[] = [
@@ -29,6 +30,7 @@ const initialRewards: Reward[] = [
 ];
 
 export default function RewardsPage() {
+  const { addNotification } = useNotifications();
   const [rewards, setRewards] = useLocalStorage<Reward[]>('app_rewards', initialRewards);
   const [tab, setTab] = useState(0);
   const [redeemTarget, setRedeemTarget] = useState<Reward | null>(null);
@@ -57,6 +59,11 @@ export default function RewardsPage() {
       totalSpent: prev.totalSpent + redeemTarget.cost,
       currentPoints: prev.currentPoints - redeemTarget.cost,
     }));
+    addNotification({
+      type: 'reward_redeemed',
+      title: `ご褒美「${redeemTarget.name}」を交換！`,
+      message: `${redeemTarget.cost}ポイントを使用しました`,
+    });
     setRedeemTarget(null);
   };
 
