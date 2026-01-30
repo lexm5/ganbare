@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useLocalStorage } from '@/lib/useLocalStorage';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
@@ -28,10 +29,10 @@ const initialRewards: Reward[] = [
 ];
 
 export default function RewardsPage() {
-  const [rewards, setRewards] = useState<Reward[]>(initialRewards);
+  const [rewards, setRewards] = useLocalStorage<Reward[]>('app_rewards', initialRewards);
   const [tab, setTab] = useState(0);
   const [redeemTarget, setRedeemTarget] = useState<Reward | null>(null);
-  const [pointStatus, setPointStatus] = useState<PointStatus>({
+  const [pointStatus, setPointStatus] = useLocalStorage<PointStatus>('app_point_status', {
     totalEarned: 150,
     totalSpent: 50,
     currentPoints: 100,

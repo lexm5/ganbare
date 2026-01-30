@@ -1,12 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import { useLocalStorage } from '@/lib/useLocalStorage';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
 import PageHeader from '@/components/common/PageHeader';
 import HabitList from '@/components/habits/HabitList';
 import StreakBadge from '@/components/habits/StreakBadge';
@@ -22,12 +28,32 @@ const initialHabits: Habit[] = [
 ];
 
 export default function HabitsPage() {
-  const [habits, setHabits] = useState<Habit[]>(initialHabits);
+  const [habits, setHabits] = useLocalStorage<Habit[]>('app_habits', initialHabits);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [newHabitName, setNewHabitName] = useState('');
 
   const handleToggle = (id: string) => {
     setHabits(habits.map(h =>
       h.id === id ? { ...h, completedToday: !h.completedToday } : h
     ));
+  };
+
+  const handleAddHabit = () => {
+    if (newHabitName.trim() === '') return;
+    const newHabit: Habit = {
+      id: String(Date.now()),
+      name: newHabitName.trim(),
+      streak: 0,
+      completedToday: false,
+    };
+    setHabits([...habits, newHabit]);
+    setNewHabitName('');
+    setOpenDialog(false);
+  };
+
+  const handleCloseDialog = () => {
+    setNewHabitName('');
+    setOpenDialog(false);
   };
 
   const completedCount = habits.filter(h => h.completedToday).length;
@@ -39,7 +65,11 @@ export default function HabitsPage() {
         title="習慣トラッカー"
         description="毎日の習慣を記録して、継続の力を実感しよう"
         action={
-          <Button variant="contained" startIcon={<AddIcon />}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setOpenDialog(true)}
+          >
             習慣を追加
           </Button>
         }
@@ -75,6 +105,40 @@ export default function HabitsPage() {
           </Card>
         </Grid>
       </Grid>
+
+      {/* 習慣追加ダイアログ */}
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>新しい習慣を追加</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="習慣名"
+            placeholder="例: 朝のジョギング"
+            fullWidth
+            value={newHabitName}
+            onChange={(e) => setNewHabitName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleAddHabit();
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>キャンセル</Button>
+          <Button
+            onClick={handleAddHabit}
+            variant="contained"
+            disabled={newHabitName.trim() === ''}
+          >
+            追加
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

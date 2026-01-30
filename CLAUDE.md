@@ -113,6 +113,19 @@ npm run build    # ビルド
 - **通知システム**: アプリ内通知 (タスク完了、ストリーク達成、バッジ獲得等)、Context + localStorage で永続化
 - **Tipsメニュー**: ヘッダーにモチベーション向上のヒント表示（ランダム3件、更新ボタン付き）
 - **検索バー**: タスク・習慣をlocalStorageから横断検索、ポップオーバーで結果表示、クリックで該当ページへ遷移
+- **データ永続化**: タスク・習慣・ご褒美・ポイントをlocalStorageに自動保存（`useLocalStorage`フック）
+
+## localStorage キー一覧
+
+| キー | 内容 |
+|------|------|
+| `app_tasks` | タスク一覧 |
+| `app_habits` | 習慣一覧 |
+| `app_rewards` | ご褒美一覧 |
+| `app_point_status` | ポイント状態（獲得/使用/現在） |
+| `app_notifications` | 通知一覧 |
+| `LAST_LOGIN_KEY` | 最終ログイン日 |
+| `STREAK_KEY` | ログインストリーク |
 
 ## 通知システム
 

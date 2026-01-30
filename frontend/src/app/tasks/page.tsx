@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocalStorage } from '@/lib/useLocalStorage';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -38,13 +39,13 @@ const initialTasks: Task[] = [
 ];
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useLocalStorage<Task[]>('app_tasks', initialTasks);
   const [categories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [filters, setFilters] = useState<Filters>({ status: 'all', categoryId: null, difficulty: null });
   const [searchQuery, setSearchQuery] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editTaskId, setEditTaskId] = useState<string | null>(null);
-  const [pointStatus, setPointStatus] = useState<PointStatus>({
+  const [pointStatus, setPointStatus] = useLocalStorage<PointStatus>('app_point_status', {
     totalEarned: 3,
     totalSpent: 0,
     currentPoints: 3,
